@@ -43,13 +43,21 @@ def face_mask_detetction_fun():
     with open('classes.txt', 'r') as f:
         classes = f.read().splitlines()
 
-    img = cv2.imread('test3.jpg')
-    print(img.shape)
+    # img = cv2.imread('test3.jpg')
+    # print(img.shape)
 
     cap = cv2.VideoCapture(0)
 
     while True:
         success, img = cap.read()
+        imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
+        imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
+
+        facesCurFrame = face_recognition.face_locations(imgS)
+        encodesCurFrame = face_recognition.face_encodings(imgS, facesCurFrame)
+
+
+
         height, width, = img.shape[:2]
 
         colors = np.random.uniform(0, 255, size=(100, 3))
@@ -90,6 +98,17 @@ def face_mask_detetction_fun():
                 confidence = str(round(confidences[i], 2) * 100)
                 if label == "not wearing mask":
                     color = (0, 0, 255)
+                    for encodeFace, faceLoc in zip(encodesCurFrame, facesCurFrame):
+                        matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
+                        faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
+
+                        matchIndex = np.argmin(faceDis)
+
+                        if matches[matchIndex]:
+                            name = classNames[matchIndex].upper()
+                            # print(name)
+
+                            markAttendence(name)
                 else:
                     color = (0, 255, 0)
                 cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
