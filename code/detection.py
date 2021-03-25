@@ -121,20 +121,24 @@ def face_mask_detetction_fun():
     cap.release()
     cv2.destroyAllWindows()
 
+def append_data(lst):
+    df = pd.DataFrame(lst)
+    df.to_csv('Attendence.csv', mode='a', index=False,header=False)
+    remove_duplicates()
+
+def remove_duplicates():
+    df = pd.read_csv('Attendence.csv')
+    df.drop_duplicates(inplace=True)
+    df.to_csv('Attendence.csv', mode='w',index=False)
 
 def markAttendence(name):
-    with open('Attendence.csv','r+') as f:
-        myDataList = f.readlines()
-
-        # print(myDataList)
-        nameList=[]
-        for line in myDataList:
-            entry = line.split(',')
-            nameList.append(entry[0])
-        if name not in nameList:
-            now = datetime.now()
-            dtString = now.strftime('%H : %M : %S')
-            f.writelines(f'\n{name},{dtString}')
+    mask = "Not Wearing"
+    temp = 37.25
+    get_time = datetime.now().time().strftime("%H%M")  # now
+    get_time = datetime.strptime(get_time, "%H%M").time()
+    lst = {'Name': [name], 'Mask Status': [mask], 'Temperature': [temp], 'Date': [datetime.now().date()],
+           'Time': [get_time]}
+    append_data(lst)
 
 
 # face_mask_detetction_fun()
@@ -156,9 +160,9 @@ frame3 = Frame(root,borderwidth=6,relief=GROOVE)
 frame1.pack(side=TOP)
 frame1.place(x=20,y=40)
 frame2.pack(side=BOTTOM)
-frame2.place(x=250,y=440)
+frame2.place(x=10,y=440)
 frame3.pack(side=BOTTOM)
-frame3.place(x=870,y=400)
+frame3.place(x=340,y=400)
 
 
 def file_open():
@@ -196,7 +200,7 @@ def file_open():
     for row in df_rows:
         my_tree.insert("","end",values=row)
 
-    my_tree.grid(row=0,column=0,pady=10)
+    my_tree.grid(row=0,column=0)
     btn_close.grid(row=1, column=0)
 
 

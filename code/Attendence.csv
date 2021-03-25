@@ -1,1 +1,4 @@
-Name,Time
+Name,Mask Status,Temperature,Date,Time
+HARSH,Not Wearing,37.25,2021-03-25,16:26:00
+HARSH,Not Wearing,37.25,2021-03-25,16:27:00
+HARSH,Not Wearing,37.25,2021-03-25,16:28:00
