@@ -1,7 +1,7 @@
 import serial
 
-arduino_port = "COM8" #serial port of Arduino
-baud = 9600 #arduino uno runs at 9600 baud
+arduino_port = "/dev/ttyUSB0"  # serial port of Arduino
+baud = 9600  # arduino uno runs at 9600 baud
 fileName="analog-data-10.csv" #name of the CSV file generated
 
 ser = serial.Serial(arduino_port, baud)
