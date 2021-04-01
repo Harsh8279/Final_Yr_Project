@@ -8,6 +8,7 @@ import face_recognition
 import imutils
 import numpy as np
 import pandas as pd
+import serial
 from PIL import Image, ImageTk
 from scipy.spatial import distance as dist
 
@@ -125,20 +126,34 @@ def face_mask_detetction_fun():
     cap.release()
     cv2.destroyAllWindows()
 
+
+def temp_detection():
+    arduino_port = "/dev/ttyUSB0"  # serial port of Arduino
+    baud = 9600  # arduino uno runs at 9600 baud
+
+    ser = serial.Serial(arduino_port, baud)
+    # print("Connected to Arduino port:" + arduino_port)
+    ser_bytes = ser.readline()
+    decoded_bytes = float(ser_bytes[0:len(ser_bytes) - 2])
+
+    return decoded_bytes
+
+
 def append_data(lst):
     df = pd.DataFrame(lst)
-    df.to_csv('Attendence.csv', mode='a', index=False,header=False)
+    df.to_csv('Attendence.csv', mode='a', index=False, header=False)
     remove_duplicates()
+
 
 def remove_duplicates():
     df = pd.read_csv('Attendence.csv')
     df.drop_duplicates(inplace=True)
-    df.to_csv('Attendence.csv', mode='w',index=False)
+    df.to_csv('Attendence.csv', mode='w', index=False)
 
 
 def markAttendence(name):
     mask = "Not Wearing"
-    temp = 37.25
+    temp = temp_detection()
     get_time = datetime.now().time().strftime("%H%M")  # now
     get_time = datetime.strptime(get_time, "%H%M").time()
     lst = {'Name': [name], 'Mask Status': [mask], 'Temperature': [temp], 'Date': [datetime.now().date()],
@@ -408,14 +423,14 @@ btn_face_mask_detection.grid(row=0, column=0, padx=20, pady=20)
 btn_social_distance = Button(frame2, text="Social Distance Detection", command=social_distance_detection)
 btn_social_distance.grid(row=0, column=1, padx=20, pady=20)
 
-btn_face_mask_recognition = Button(frame2, text="Face Mask Recognition", command=face_mask_detetction_fun)
+btn_face_mask_recognition = Button(frame2, text="Face Mask And Temperature Detection", command=face_mask_detetction_fun)
 btn_face_mask_recognition.grid(row=1, column=0, padx=20, pady=20)
 
-btn_mask_temperature_detection = Button(frame2, text="Face Mask and Temperature Detection")
-btn_mask_temperature_detection.grid(row=1, column=1, padx=20, pady=20)
+# btn_mask_temperature_detection = Button(frame2, text="Face Mask and Temperature Detection")
+# btn_mask_temperature_detection.grid(row=1, column=1, padx=20, pady=20)
 
 btn_open = Button(frame2, text="Open", command=file_open)
-btn_open.grid(row=2, column=0, padx=20, pady=20)
+btn_open.grid(row=1, column=1, padx=20, pady=20)
 
 btn_close = Button(frame3, text="Close", command=clear_tree)
 
