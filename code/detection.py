@@ -1,19 +1,21 @@
-import cv2
-import numpy as np
 import os
-import face_recognition
 from datetime import datetime
 from tkinter import *
-from PIL import Image,ImageTk
-from tkinter import ttk,filedialog
+from tkinter import ttk, filedialog
+
+import cv2
+import face_recognition
+import numpy as np
 import pandas as pd
+from PIL import Image, ImageTk
+
 
 # reco
 def file_encoding(images):
     encode_list = []
 
     for i in images:
-        i = cv2.cvtColor(i,cv2.COLOR_BGR2RGB)
+        i = cv2.cvtColor(i, cv2.COLOR_BGR2RGB)
         encode = face_recognition.face_encodings(i)[0]
         encode_list.append(encode)
 
@@ -148,7 +150,7 @@ root = Tk()
 image =Image.open(r"TestOne.jpg")
 # image_two =Image.open(r"recoOne.jpg")
 
-image = image.resize((800, 350), Image.ANTIALIAS)
+image = image.resize((700, 300), Image.ANTIALIAS)
 # image_two = image_two.resize((430, 350), Image.ANTIALIAS)
 
 root.title("Face Mask Detection")
@@ -160,9 +162,9 @@ frame3 = Frame(root,borderwidth=6,relief=GROOVE)
 frame1.pack(side=TOP)
 frame1.place(x=20,y=40)
 frame2.pack(side=BOTTOM)
-frame2.place(x=10,y=440)
+frame2.place(x=750, y=80)
 frame3.pack(side=BOTTOM)
-frame3.place(x=340,y=400)
+frame3.place(x=200, y=420)
 
 
 def file_open():
@@ -174,35 +176,34 @@ def file_open():
 
     if filename:
         try:
-            filename=r"{}".format(filename)
+            filename = r"{}".format(filename)
             df = pd.read_csv(filename)
+
+            # clear the Tree view
+            clear_tree()
+
+            # set up new Tree view
+            my_tree["column"] = list(df.columns)
+            my_tree["show"] = "headings"
+
+            # loop thru column list
+
+            for column in my_tree["column"]:
+                my_tree.heading(column, text=column)
+
+            df_rows = df.to_numpy().tolist()
+
+            for row in df_rows:
+                my_tree.insert("", "end", values=row)
+
+            my_tree.grid(row=0, column=0)
+            btn_close.grid(row=1, column=0)
 
         except ValueError:
             my_label.config(text="File couldn't be open")
 
         except FileNotFoundError:
             my_label.config(text="File Not Found !!")
-
-    # clear the Tree view
-    clear_tree()
-
-    # set up new Tree view
-    my_tree["column"] = list(df.columns)
-    my_tree["show"] = "headings"
-
-    # loop thru column list
-
-    for column in my_tree["column"]:
-        my_tree.heading(column,text=column)
-
-    df_rows = df.to_numpy().tolist()
-
-    for row in df_rows:
-        my_tree.insert("","end",values=row)
-
-    my_tree.grid(row=0,column=0)
-    btn_close.grid(row=1, column=0)
-
 
 
 def clear_tree():
@@ -217,26 +218,33 @@ photo = ImageTk.PhotoImage(image)
 label['image'] = photo
 # label_two['image'] = photo_two
 
-label.grid(row=0,column=0,pady=5)
+label.grid(row=0, column=0, pady=5)
 # label_two.grid(row=0,column=1,pady=5)
 
 #
 # btn_face_mask_detection = Button(frame2,text="Face MasK Detection")
 # btn_face_mask_detection.grid(row=0,column=0,padx=20,pady=20)
 
+btn_face_mask_detection = Button(frame2, text="Face Mask Detection")
+btn_face_mask_detection.grid(row=0, column=0, padx=20, pady=20)
 
-btn_face_mask_recognition = Button(frame2,text="Face Mask Recognition",command=face_mask_detetction_fun)
-btn_face_mask_recognition.grid(row=0,column=0,padx=20,pady=20)
+btn_social_distance = Button(frame2, text="Social Distance Detection")
+btn_social_distance.grid(row=0, column=1, padx=20, pady=20)
 
-btn_open = Button(frame2,text="Open",command=file_open)
-btn_open.grid(row=0,column=1,padx=20,pady=20)
+btn_face_mask_recognition = Button(frame2, text="Face Mask Recognition", command=face_mask_detetction_fun)
+btn_face_mask_recognition.grid(row=1, column=0, padx=20, pady=20)
 
-btn_close = Button(frame3,text="Close",command=clear_tree)
+btn_mask_temperature_detection = Button(frame2, text="Face Mask and Temperature Detection")
+btn_mask_temperature_detection.grid(row=1, column=1, padx=20, pady=20)
 
+btn_open = Button(frame2, text="Open", command=file_open)
+btn_open.grid(row=2, column=0, padx=20, pady=20)
+
+btn_close = Button(frame3, text="Close", command=clear_tree)
 
 my_tree = ttk.Treeview(frame3)
 
-my_label = Label(root,text='')
+my_label = Label(root, text='')
 my_label.pack(pady=20)
 
 root.geometry("1500x800")
