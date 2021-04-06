@@ -95,30 +95,31 @@ def face_mask_detetction_fun():
                     class_ids.append(class_id)
 
         indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.2, 0.4)
-
+        temp = temp_detection()
+        name = "Not Known"
         if len(indexes) > 0:
             for i in indexes.flatten():
                 x, y, w, h = boxes[i]
                 label = str(classes[class_ids[i]])
                 confidence = str(round(confidences[i], 2) * 100)
+                for encodeFace, faceLoc in zip(encodesCurFrame, facesCurFrame):
+                    matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
+                    faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
+
+                    matchIndex = np.argmin(faceDis)
+
+                    if matches[matchIndex]:
+                        name = classNames[matchIndex].upper()
                 if label == "not wearing mask":
                     color = (0, 0, 255)
-                    for encodeFace, faceLoc in zip(encodesCurFrame, facesCurFrame):
-                        matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
-                        faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
 
-                        matchIndex = np.argmin(faceDis)
-
-                        if matches[matchIndex]:
-                            name = classNames[matchIndex].upper()
-                            # print(name)
-
-                            markAttendence(name)
                 else:
                     color = (0, 255, 0)
                 cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
                 cv2.putText(img, label + " " + confidence + "%", (x, y + 20), font, 1, color, 2)
         cv2.imshow('Image', img)
+        if (temp > 40) or label == "not wearing mask":
+            markAttendence(name, temp, label)
         if cv2.waitKey(1) == 27:
             break
     # cv2.waitKey(0)
@@ -134,10 +135,9 @@ def temp_detection():
     ser = serial.Serial(arduino_port, baud)
     # print("Connected to Arduino port:" + arduino_port)
     ser_bytes = ser.readline()
-    decoded_bytes = float(ser_bytes[0:len(ser_bytes) - 2])
+    decoded_bytes = int(float(ser_bytes[0:len(ser_bytes) - 2]))
 
     return decoded_bytes
-
 
 def append_data(lst):
     df = pd.DataFrame(lst)
@@ -151,9 +151,11 @@ def remove_duplicates():
     df.to_csv('Attendence.csv', mode='w', index=False)
 
 
-def markAttendence(name):
-    mask = "Not Wearing"
-    temp = temp_detection()
+def markAttendence(name, temp, label):
+    if label == "wearing mask":
+        mask = "Wearing"
+    else:
+        mask = "Not Wearing"
     get_time = datetime.now().time().strftime("%H%M")  # now
     get_time = datetime.strptime(get_time, "%H%M").time()
     lst = {'Name': [name], 'Mask Status': [mask], 'Temperature': [temp], 'Date': [datetime.now().date()],
@@ -346,6 +348,8 @@ def only_mask_detection():
 
 root = Tk()
 
+root['background'] = '#82eefd'
+
 image = Image.open(r"TestOne.jpg")
 
 image = image.resize((700, 300), Image.ANTIALIAS)
@@ -354,21 +358,24 @@ root.title("Face Mask Detection")
 
 frame1 = Frame(root)
 frame2 = Frame(root)
-frame3 = Frame(root,borderwidth=6,relief=GROOVE)
+frame3 = Frame(root, borderwidth=6, relief=GROOVE)
 
 frame1.pack(side=TOP)
-frame1.place(x=20,y=40)
+frame1.place(x=20, y=40)
 frame2.pack(side=BOTTOM)
 frame2.place(x=750, y=80)
 frame3.pack(side=BOTTOM)
 frame3.place(x=200, y=420)
 
+frame2['background'] = '#82eefd'
+frame1['background'] = '#82eefd'
+
 
 def file_open():
     filename = filedialog.askopenfilename(
-        initialdir= os.getcwd(),
-        title= "Open A file",
-        filetypes=(("csv files","*.csv"),("all files","*.*"))
+        initialdir=os.getcwd(),
+        title="Open A file",
+        filetypes=(("csv files", "*.csv"), ("all files", "*.*"))
     )
 
     if filename:
