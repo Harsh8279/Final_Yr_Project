@@ -1,14 +1,5 @@
-Name,Mask Status,Temperature,Date,Time
-HARSH,Not Wearing,37.25,2021-04-01,23:56:00
-HARSH,Not Wearing,38.25,2021-04-02,01:41:00
-HARSH,Not Wearing,37.89,2021-04-02,01:41:00
-HARSH,Not Wearing,37.69,2021-04-02,01:41:00
-HARSH,Not Wearing,37.81,2021-04-02,01:41:00
-HARSH,Not Wearing,36.69,2021-04-02,01:42:00
-HARSH,Not Wearing,36.77,2021-04-02,01:42:00
-HARSH,Not Wearing,36.83,2021-04-02,01:42:00
-Not Known,Wearing,44.0,2021-04-07,00:23:00
-Not Known,Not Wearing,36.0,2021-04-07,00:24:00
-HARSH,Not Wearing,36.0,2021-04-07,00:24:00
-Not Known,Not Wearing,36.0,2021-04-07,00:25:00
-
+Name,Mask Status,Temperature,Date,Time,Temperature Status
+Not Known,Not Wearing,38,2021-04-14,15:35:00,NORMAL
+Not Known,Not Wearing,51,2021-04-14,15:35:00,HIGH
+HARSH,Not Wearing,42,2021-04-14,15:36:00,HIGH
+HARSH,Not Wearing,38,2021-04-14,15:38:00,NORMAL
