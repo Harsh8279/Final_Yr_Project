@@ -25,7 +25,7 @@ def file_encoding(images):
     return encode_list
 
 # reco
-path = "AttendenceImages"
+path = "./res/AttendenceImages"  # folder
 images = []
 classNames = []
 
@@ -41,11 +41,11 @@ encodeListKnown = file_encoding(images)
 print("Encoding Completed!!!")
 
 def face_mask_detetction_fun():
-    net = cv2.dnn.readNet('yolov3_training_final.weights', 'yolov3_testing.cfg')
+    net = cv2.dnn.readNet('./res/yolov3_training_final.weights', 'yolov3_testing.cfg')  # file
 
     classes = []
     font = cv2.FONT_HERSHEY_DUPLEX
-    with open('classes.txt', 'r') as f:
+    with open('./res/classes.txt', 'r') as f:  # file
         classes = f.read().splitlines()
 
     # img = cv2.imread('test3.jpg')
@@ -152,14 +152,14 @@ def temp_detection():
 
 def append_data(lst):
     df = pd.DataFrame(lst)
-    df.to_csv('Attendence.csv', mode='a', index=False, header=False)
+    df.to_csv('./res/Attendence.csv', mode='a', index=False, header=False)  # file
     remove_duplicates()
 
 
 def remove_duplicates():
-    df = pd.read_csv('Attendence.csv')
+    df = pd.read_csv('./res/Attendence.csv')  # file
     df.drop_duplicates(inplace=True)
-    df.to_csv('Attendence.csv', mode='w', index=False)
+    df.to_csv('./res/Attendence.csv', mode='w', index=False)
 
 
 def markAttendence(name, temp, label, status):
@@ -223,10 +223,10 @@ def detect_people(frame, net, ln, personIdx=0):
 
 
 def social_distance_detection():
-    net = cv2.dnn.readNet('yolov3.weights', 'yolov3.cfg')
+    net = cv2.dnn.readNet('./res/yolov3.weights', './res/yolov3.cfg')  # file
 
     classes = []  # LABELS
-    with open('coco.names', 'r') as f:
+    with open('./res/coco.names', 'r') as f:  # file
         classes = f.read().splitlines()
 
     # print(classes)
@@ -236,7 +236,7 @@ def social_distance_detection():
     ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
     # img = cv2.imread('1.jpg')
-    cap = cv2.VideoCapture("test.mp4")  # video
+    cap = cv2.VideoCapture("./res/test.mp4")  # video                 # file
     # cap = cv2.VideoCapture(0)       # live web cam
 
     writer = None
@@ -290,11 +290,11 @@ def social_distance_detection():
 
 # Only Face Mask Detection
 def only_mask_detection():
-    net = cv2.dnn.readNet('yolov3_training_final.weights', 'yolov3_testing.cfg')
+    net = cv2.dnn.readNet('./res/yolov3_training_final.weights', './res/yolov3_testing.cfg')  # file
 
     classes = []
     font = cv2.FONT_HERSHEY_DUPLEX
-    with open('classes.txt', 'r') as f:
+    with open('./res/classes.txt', 'r') as f:  # file
         classes = f.read().splitlines()
 
     # img = cv2.imread('test3.jpg')
@@ -361,7 +361,7 @@ root = Tk()
 
 root['background'] = '#82eefd'
 
-image = Image.open(r"TestOne.jpg")
+image = Image.open(r"./res/TestOne.jpg")  # file
 
 image = image.resize((700, 300), Image.ANTIALIAS)
 
