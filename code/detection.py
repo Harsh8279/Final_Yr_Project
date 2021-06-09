@@ -9,8 +9,9 @@ import imutils
 import numpy as np
 import pandas as pd
 import serial
+import math
 from PIL import Image, ImageTk
-from scipy.spatial import distance as dist
+# from scipy.spatial import distance as dist
 
 
 # reco
@@ -25,7 +26,7 @@ def file_encoding(images):
     return encode_list
 
 # reco
-path = "./res/AttendenceImages"  # folder
+path = ".\\res\\AttendenceImages"  # folder
 images = []
 classNames = []
 
@@ -41,11 +42,11 @@ encodeListKnown = file_encoding(images)
 print("Encoding Completed!!!")
 
 def face_mask_detetction_fun():
-    net = cv2.dnn.readNet('./res/yolov3_training_final.weights', 'yolov3_testing.cfg')  # file
+    net = cv2.dnn.readNet('.\\res\\yolov3_training_final.weights', '.\\res\\yolov3_testing.cfg')  # file
 
     classes = []
     font = cv2.FONT_HERSHEY_DUPLEX
-    with open('./res/classes.txt', 'r') as f:  # file
+    with open('.\\res\\classes.txt', 'r') as f:  # file
         classes = f.read().splitlines()
 
     # img = cv2.imread('test3.jpg')
@@ -102,6 +103,7 @@ def face_mask_detetction_fun():
         else:
             temp, status = temp_func
         name = "Not Known"
+        label = ""
         if len(indexes) > 0:
             for i in indexes.flatten():
                 x, y, w, h = boxes[i]
@@ -134,32 +136,35 @@ def face_mask_detetction_fun():
 
 
 def temp_detection():
-    arduino_port = "/dev/ttyUSB0"  # serial port of Arduino
+    # arduino_port = "/dev/ttyUSB0"  # UBUNTU serial port of Arduino
+    arduino_port = "COM5" # windows
     baud = 9600  # arduino uno runs at 9600 baud
-
-    ser = serial.Serial(arduino_port, baud)
-    # print("Connected to Arduino port:" + arduino_port)
-    ser_bytes = ser.readline()
     try:
-        decoded_bytes = int(float(ser_bytes[0:len(ser_bytes) - 2]))
-        return decoded_bytes
+        ser = serial.Serial(arduino_port, baud)
+        # print("Connected to Arduino port:" + arduino_port)
+        ser_bytes = ser.readline()
+        try:
+            decoded_bytes = int(float(ser_bytes[0:len(ser_bytes) - 2]))
+            return decoded_bytes
+        except:
+            decoded_bytes = (ser_bytes[0:len(ser_bytes) - 2])
+            lst = decoded_bytes.decode('UTF-8').split(',')
+            decoded_bytes = int(float(lst[0]))
+            status = lst[-1]
+            return decoded_bytes, status
     except:
-        decoded_bytes = (ser_bytes[0:len(ser_bytes) - 2])
-        lst = decoded_bytes.decode('UTF-8').split(',')
-        decoded_bytes = int(float(lst[0]))
-        status = lst[-1]
-        return decoded_bytes, status
+        return (37.5,'NORMAL')
 
 def append_data(lst):
     df = pd.DataFrame(lst)
-    df.to_csv('./res/Attendence.csv', mode='a', index=False, header=False)  # file
+    df.to_csv('.\\res\\Attendence.csv', mode='a', index=False, header=False)  # file
     remove_duplicates()
 
 
 def remove_duplicates():
-    df = pd.read_csv('./res/Attendence.csv')  # file
+    df = pd.read_csv('.\\res\\Attendence.csv')  # file
     df.drop_duplicates(inplace=True)
-    df.to_csv('./res/Attendence.csv', mode='w', index=False)
+    df.to_csv('.\\res\\Attendence.csv', mode='w', index=False)
 
 
 def markAttendence(name, temp, label, status):
@@ -223,10 +228,10 @@ def detect_people(frame, net, ln, personIdx=0):
 
 
 def social_distance_detection():
-    net = cv2.dnn.readNet('./res/yolov3.weights', './res/yolov3.cfg')  # file
+    net = cv2.dnn.readNet('.\\res\\yolov3.weights', '.\\res\\yolov3.cfg')  # file
 
     classes = []  # LABELS
-    with open('./res/coco.names', 'r') as f:  # file
+    with open('.\\res\\coco.names', 'r') as f:  # file
         classes = f.read().splitlines()
 
     # print(classes)
@@ -236,7 +241,7 @@ def social_distance_detection():
     ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
     # img = cv2.imread('1.jpg')
-    cap = cv2.VideoCapture("./res/test.mp4")  # video                 # file
+    cap = cv2.VideoCapture(".\\res\\test.mp4")  # video                 # file
     # cap = cv2.VideoCapture(0)       # live web cam
 
     writer = None
@@ -256,8 +261,16 @@ def social_distance_detection():
         if len(results) >= 2:
             #     extract all centroids from result and calculate euclidean distance between them
             centroids = np.array([r[2] for r in results])
-            D = dist.cdist(centroids, centroids, metric="euclidean")
-
+            # D = dist.cdist(centroids, centroids, metric="euclidean")
+            D = []
+            for i in centroids:
+                inD = []
+                for j in centroids:
+                    dist1 = math.sqrt((j[0]-i[0])**2 + (j[1]-i[1])**2)
+                    inD.append(dist1)
+                D.append(inD)
+                    
+            D = np.array(D)
             # loop over the upper triangular of the distance matrix
             for i in range(0, D.shape[0]):
                 for j in range(i + 1, D.shape[1]):
@@ -290,11 +303,11 @@ def social_distance_detection():
 
 # Only Face Mask Detection
 def only_mask_detection():
-    net = cv2.dnn.readNet('./res/yolov3_training_final.weights', './res/yolov3_testing.cfg')  # file
+    net = cv2.dnn.readNet('.\\res\\yolov3_training_final.weights', '.\\res\\yolov3_testing.cfg')  # file
 
     classes = []
     font = cv2.FONT_HERSHEY_DUPLEX
-    with open('./res/classes.txt', 'r') as f:  # file
+    with open('.\\res\\classes.txt', 'r') as f:  # file
         classes = f.read().splitlines()
 
     # img = cv2.imread('test3.jpg')
@@ -361,7 +374,7 @@ root = Tk()
 
 root['background'] = '#82eefd'
 
-image = Image.open(r"./res/TestOne.jpg")  # file
+image = Image.open(r".\\res\\TestOne.jpg")  # file
 
 image = image.resize((700, 300), Image.ANTIALIAS)
 
